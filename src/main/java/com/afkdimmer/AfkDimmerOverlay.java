@@ -1,6 +1,8 @@
 package com.afkdimmer;
 
 import net.runelite.api.Client;
+import net.runelite.api.widgets.Widget;
+import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
@@ -25,19 +27,40 @@ public class AfkDimmerOverlay extends Overlay {
         this.client = client;
 
         setPosition(OverlayPosition.DYNAMIC);
-        setPriority(OverlayPriority.LOW);
-        setLayer(OverlayLayer.ABOVE_SCENE);
+        setPriority(OverlayPriority.HIGH);
+        setLayer(OverlayLayer.ALWAYS_ON_TOP);
 
     }
 
+    private float currentAlpha = 0f;
     public Dimension render(Graphics2D graphics) {
 
-        if (plugin.dimmerEnabled) {
-            int dimmerStrengthPercent = config.dimmerStrength()/100;
-            graphics.setColor(new Color(0, 0, 0, (dimmerStrengthPercent)));
-            graphics.fill(client.getCanvas().getBounds());
-
+        // Skip if welcome screen is showing
+        Widget welcomeScreen = client.getWidget(WidgetInfo.LOGIN_CLICK_TO_PLAY_SCREEN);
+        if (welcomeScreen != null && !welcomeScreen.isHidden())
+        {
+            return null;
         }
+
+        // Shorthand if-else statement, dim when true
+        float targetAlpha = plugin.afkDimmerEnabled
+                ? config.dimmerStrength()/100f
+                : 0f;
+
+        // Smoothly move currentAlpha towards targetAlpha
+        float speed = 0.06f; // lower = slower fade
+        if (Math.abs(currentAlpha - targetAlpha) > 0.01f)
+        {
+            currentAlpha += (targetAlpha - currentAlpha) * speed;
+        }
+        else
+        {
+            currentAlpha = targetAlpha;
+        }
+
+        // Draw the dimmer overlay
+        graphics.setColor(new Color(0, 0, 0, currentAlpha));
+        graphics.fill(client.getCanvas().getBounds());
 
         return null;
     }
