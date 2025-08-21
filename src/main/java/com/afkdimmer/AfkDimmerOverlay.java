@@ -2,7 +2,7 @@ package com.afkdimmer;
 
 import net.runelite.api.Client;
 import net.runelite.api.widgets.Widget;
-import net.runelite.api.widgets.WidgetInfo;
+import net.runelite.api.gameval.InterfaceID;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
@@ -35,12 +35,13 @@ public class AfkDimmerOverlay extends Overlay {
     private float currentAlpha = 0f;
     public Dimension render(Graphics2D graphics) {
 
-        // Skip if welcome screen is showing
-        Widget welcomeScreen = client.getWidget(WidgetInfo.LOGIN_CLICK_TO_PLAY_SCREEN);
-        if (welcomeScreen != null && !welcomeScreen.isHidden())
+
+        Widget welcome = client.getWidget(InterfaceID.WelcomeScreen.PLAY);
+        if (welcome != null)
         {
-            return null;
+            return null; // skip drawing if news screen is up
         }
+
 
         // Shorthand if-else statement, dim when true
         float targetAlpha = plugin.afkDimmerEnabled
